@@ -1,8 +1,0 @@
-title: Quarto-email
-author: Richard Iannone
-version: 1.0.0
-quarto-required: ">=99.9.0"
-contributes:
-  filters:
-    - quarto-email.lua
-
