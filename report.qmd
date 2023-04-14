@@ -1,0 +1,25 @@
+---
+format: html
+filters:
+   - quarto-email
+---
+
+# A Report
+
+This is a report that contains R code.
+
+```{r}
+library(gt)
+
+gt(exibble) |>
+  tab_options(quarto.disable_processing = TRUE)
+```
+
+This can include an email message.
+
+:::{.email}
+
+Hello,
+
+This is an HTML message by default. It is rendered by the **blastula** package when using R. 
+:::
