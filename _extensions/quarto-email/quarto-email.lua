@@ -1,22 +1,29 @@
+local subject = nil
+local attachments = nil
 
--- for development:
-local p = quarto.utils.dump
+function process_document(doc)
+    local str = quarto.json.encode({
+        hello = "world",
+        subject = subject,
+        attachments = attachments
+    })
+    io.open(".connect-email.json", "w"):write(str):close()
+end
 
--- Take all text in a code block marked with `email` and transform it to an
--- HTML string using a template 
+function Meta(meta)
+    attachments = {}
+    for _, v in pairs(meta.attachments) do
+        table.insert(attachments, pandoc.utils.stringify(v))
+    end
+end
 
-return {
-  {
-    Div = function(el)
-      
-      if not el.attr.classes:includes("email") then
-        return el
-      end
+function Div(div)
+    if div.classes:includes("subject") then
+        subject = pandoc.utils.stringify(div)
+        return {}
+    end
+end
 
-      p(el.classes)
-
-      return el
-  end
-}}
-
-
+function Pandoc(doc)
+    process_document(doc)
+end
