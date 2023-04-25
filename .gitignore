@@ -2,3 +2,6 @@
 *.pdf
 *_files/
 /.luarc.json
+.connect-email.json
+attach*.txt
+report.html
