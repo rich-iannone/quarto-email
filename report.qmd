@@ -1,25 +1,31 @@
 ---
 format: html
 filters:
-   - quarto-email
+  - quarto-email
+attachments:
+  - attach1.txt
+  - attach2.txt
 ---
 
-# A Report
+## A fancy report
 
-This is a report that contains R code.
+Hello
 
 ```{r}
-library(gt)
-
-gt(exibble) |>
-  tab_options(quarto.disable_processing = TRUE)
+#| echo: false
+write.csv(iris, "attach1.txt", row.names = FALSE)
+write.csv(iris, "attach2.txt", row.names = FALSE)
 ```
 
-This can include an email message.
+::: {.email}
 
-:::{.email}
+::: {.subject}
+This is a subject.
+:::
 
-Hello,
 
-This is an HTML message by default. It is rendered by the **blastula** package when using R. 
+```{r}
+plot(1:100)
+```
+
 :::
