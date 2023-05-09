@@ -16,6 +16,11 @@ library(tidyverse)
 
 ## A fancy report
 
+:::
+This is an unrelated div.
+:::
+
+
 Hello
 
 ```{r}
