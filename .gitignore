@@ -1,7 +1,10 @@
 *.html
 *.pdf
 *_files/
+*.json
+*.md
 /.luarc.json
 .connect-email.json
 attach*.txt
 report.html
+dev_resources
