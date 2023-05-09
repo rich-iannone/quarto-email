@@ -1,11 +1,18 @@
 ---
 format: html
-filters:
-  - quarto-email
 attachments:
   - attach1.txt
   - attach2.txt
+# this part will go on _extension.yml
+filters:
+  - quarto-email
+embed-resources: true
+rsc-report-rendering-url: https://example.com/test.html
 ---
+
+```{r setup}
+library(tidyverse)
+```
 
 ## A fancy report
 
@@ -23,9 +30,42 @@ write.csv(iris, "attach2.txt", row.names = FALSE)
 This is a subject.
 :::
 
+Here is some **R** code, which is contained within a code chunk. It produces a plot.
 
-```{r}
-plot(1:100)
+```{r diamonds_plot}
+
+diamonds %>%
+  group_by(carat, cut) %>%
+  summarize(mean_price = mean(price)) %>%
+  filter(cut != "Fair", carat < 3) %>%
+  ggplot() +
+  geom_point(aes(x = carat, y = mean_price)) +
+  stat_smooth(
+    aes(x = carat, y = mean_price),
+    method = "gam"
+  ) +
+  facet_wrap(facets = vars(cut)) +
+  labs(
+    title = "Diamond Prices",
+    subtitle = "Faceted by Diamond Cut",
+    caption = "Source: The [diamonds] dataset in {ggplot2}.",
+    x = "Carats", y = "Mean Price, US Dollars"
+  ) +
+  scale_y_continuous(labels = scales::dollar)
 ```
+
+This produces a tibble.
+
+```{r dallas_home_sales}
+dallas_home_sales <- 
+  txhousing %>%
+  filter(city == "Dallas") %>%
+  group_by(year) %>%
+  summarize(total_sales = sum(sales, na.rm = TRUE))
+
+dallas_home_sales
+```
+
+And that is it.
 
 :::
