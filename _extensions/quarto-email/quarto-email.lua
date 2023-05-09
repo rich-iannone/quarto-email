@@ -31,27 +31,19 @@ function Div(div)
 end
 
 -- function to extract the rendered HTML from a Div of class 'email'
--- this requires a
 function extract_div_html(doc)
-  -- local html = ""
-  -- local function walk_block(block)
-  --   if block.t == "Div" then
-  --   --if block.t == "Div" and block.classes:includes("email") then
-  --     local writer = pandoc.writer.new("html")
-  --     html = writer(block.content)
-  --   end
-  --   return block
-  -- end
-  -- pandoc.walk_block(doc, {walk_block = walk_block})
-  -- return html
-
   return pandoc.write(pandoc.Pandoc({ doc }), "html")
 end
 
 function process_document(doc)
 
   -- TODO: perform processing on the email HTML
+  
+  -- The following regexes remove the surrounding <div> from the HTML text
+  email_html = string.gsub(email_html, "^<div class=\"email\">", '')
+  email_html = string.gsub(email_html, "</div>$", '')
 
+  
   print("Lines of HTML of email follows:\n" .. email_html)
 
   local str = quarto.json.encode({
