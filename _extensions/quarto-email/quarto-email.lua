@@ -147,6 +147,9 @@ end
 function process_document(doc)
   -- TODO: perform processing on the email HTML
 
+  local connect_date_time = "2020-12-01 12:00:00"
+  local connect_report_subscription_url = "http://www.example.com"
+
   -- The following regexes remove the surrounding <div> from the HTML text
   email_html = string.gsub(email_html, "^<div class=\"email\">", '')
   email_html = string.gsub(email_html, "</div>$", '')
@@ -160,7 +163,10 @@ function process_document(doc)
       html_email_template_top .. html_email_template_style ..
       html_email_template_body_1 .. html_email_template_body_2 .. 
       "<td style=\"padding:12px;\">" .. email_html .. "</td>" ..
-      html_email_template_body_3 .. html_email_template_footer_1
+      html_email_template_body_3 ..
+      "<p>This message was generated on " .. connect_date_time .. ".</p>\n\n" ..
+      "<p>If you wish to stop receiving emails for this document, you may <a href=\"" ..
+      connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n"
 
   print("Lines of HTML of email follows:\n" .. html_email_body)
 
