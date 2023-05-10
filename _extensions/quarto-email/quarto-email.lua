@@ -185,7 +185,7 @@ function process_document(doc)
 
   local html_email_body =
       html_email_template_top .. html_email_template_style ..
-      html_email_template_body_1 .. html_email_template_body_2 .. 
+      html_email_template_body_1 .. html_email_template_body_2 ..
       "<td style=\"padding:12px;\">" .. email_html .. "</td>" ..
       html_email_template_body_3 ..
       "<p>This message was generated on " .. connect_date_time .. ".</p>\n\n" ..
@@ -194,7 +194,7 @@ function process_document(doc)
       "Latest Version: <a href=\"" .. connect_report_url ..
       "\">$rsc-report-url$</a></p>\n\n" ..
       "<p>If you wish to stop receiving emails for this document, you may <a href=\"" ..
-      connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" .. 
+      connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
       html_email_template_bottom
 
   print("Lines of HTML of email follows:\n" .. html_email_body)
