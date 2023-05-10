@@ -203,6 +203,7 @@ function process_document(doc)
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
   local figure_html_listing = nil
+  local image_data = nil
 
   if type(figure_html_path_handle) == "userdata" then
     figure_html_listing = figure_html_path_handle:read("*a")
@@ -213,10 +214,12 @@ function process_document(doc)
 
   -- Need to get all image tags with paths referenced in the HTML email body
 
-
   local image_file = io.open("report_files/figure-html/diamonds_plot-1.png", "rb")
-  local image_data = image_file:read("*all")
-  image_file:close()
+
+  if type(image_file) == "userdata" then
+    image_data = image_file:read("*all")
+    image_file:close()
+  end
 
   local encoded_data = base64_encode(image_data)
 
