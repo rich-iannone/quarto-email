@@ -210,6 +210,18 @@ function process_document(doc)
   end
   
   print(figure_html_listing)
+
+  -- Need to get all image tags with paths referenced in the HTML email body
+
+
+  local image_file = io.open("report_files/figure-html/diamonds_plot-1.png", "rb")
+  local image_data = image_file:read("*all")
+  image_file:close()
+
+  local encoded_data = base64_encode(image_data)
+
+  -- print(encoded_data)
+
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
