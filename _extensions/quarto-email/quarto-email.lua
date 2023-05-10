@@ -91,16 +91,8 @@ local html_email_template_body_3 = [[
 -- $if(include-after)$
 -- <hr/>$endif$
 
-local html_email_template_footer_1 = [[
-<p>This message was generated on $rsc-date-time$.</p>
-
-<p>This Version: <a href="$rsc-report-rendering-url$">$rsc-report-rendering-url$</a><br/>
-Latest Version: <a href="$rsc-report-url$">$rsc-report-url$</a></p>
-
-<p>If you wish to stop receiving emails for this document, you may <a href="$rsc-report-subscription-url$">unsubscribe here</a>.</p>
-
+local html_email_template_bottom = [[
 <p>If HTML documents are attached, they may not render correctly when viewed in some email clients. For a better experience, download HTML documents to disk before opening in a web browser.</p>
-$endif$
 </div>
 </td>
 </tr>
@@ -131,11 +123,9 @@ end
 function Div(div)
   if div.classes:includes("subject") then
     subject = pandoc.utils.stringify(div)
-    print("The email subject is: " .. subject)
     return {}
   elseif div.classes:includes("email") then
     email_html = extract_div_html(div)
-    print("-- Email message HTML has been extracted -- length is " .. string.len(email_html) .. " characters.")
   end
 end
 
@@ -148,13 +138,13 @@ function process_document(doc)
   -- TODO: perform processing on the email HTML
 
   local connect_date_time = "2020-12-01 12:00:00"
+  local connect_report_rendering_url = "http://www.example.com"
+  local connect_report_url = "http://www.example.com"
   local connect_report_subscription_url = "http://www.example.com"
 
   -- The following regexes remove the surrounding <div> from the HTML text
   email_html = string.gsub(email_html, "^<div class=\"email\">", '')
   email_html = string.gsub(email_html, "</div>$", '')
-
-  print(email_html)
 
   -- Use the Connect email template components along with the `email_html`
   -- fragment to forge the email HTML
@@ -165,8 +155,13 @@ function process_document(doc)
       "<td style=\"padding:12px;\">" .. email_html .. "</td>" ..
       html_email_template_body_3 ..
       "<p>This message was generated on " .. connect_date_time .. ".</p>\n\n" ..
+      "<p>This Version: <a href=\"" .. connect_report_rendering_url .. "\">" ..
+      connect_report_rendering_url .. "</a><br/>" ..
+      "Latest Version: <a href=\"" .. connect_report_url ..
+      "\">$rsc-report-url$</a></p>\n\n" ..
       "<p>If you wish to stop receiving emails for this document, you may <a href=\"" ..
-      connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n"
+      connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" .. 
+      html_email_template_bottom
 
   print("Lines of HTML of email follows:\n" .. html_email_body)
 
