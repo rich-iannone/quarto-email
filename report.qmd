@@ -6,7 +6,7 @@ attachments:
 # this part will go on _extension.yml
 filters:
   - quarto-email
-embed-resources: true
+embed-resources: false
 rsc-report-rendering-url: https://example.com/test.html
 ---
 
