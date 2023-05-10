@@ -1,4 +1,3 @@
--- Extension for generating email components for Posit Connect
 --[[
 Extension for generating email components needed for Posit Connect
 
