@@ -31,6 +31,9 @@ function base64_encode(data)
   end) .. ({ "", "==", "=" })[#data % 3 + 1])
 end
 
+-- Define path for images associated with figures
+local figure_html_path = "report_files/figure-html"
+
 local html_email_template_top = [[
 <!DOCTYPE html>
 <html>
