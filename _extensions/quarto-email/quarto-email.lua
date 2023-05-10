@@ -1,4 +1,21 @@
 -- Extension for generating email components for Posit Connect
+--[[
+Extension for generating email components needed for Posit Connect
+
+1. extracts the subject line of the email from a div with the class `subject` 
+2. takes a div from a Quarto HTML document that has the class `email`, places that in
+   a specially-crafted HTML-email template
+3. takes all references to images (i.e, image tags) and replaces them with CID
+   (Content-ID) tags. When embedding an image in an HTML email, rather than linking
+   to the image file on a server, the image is encoded and included directly in the
+   message.
+4. identifies all associated images (e.g., PNGs) in the email portion of the document
+   (as some may exist outside of the email context/div and creates Base64 encoded strings;
+   we must also include mime-type information
+5. generates a JSON file which contains specific email message components that Posit
+   Connect is expecting for its own email generation code
+]]
+
 
 local html_email_template_top = [[
 <!DOCTYPE html>
