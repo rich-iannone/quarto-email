@@ -199,6 +199,17 @@ function process_document(doc)
 
   print("Lines of HTML of email follows:\n" .. html_email_body)
 
+  -- Need to get all image files in `report_files/figure-html`
+  local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
+  local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
+  local figure_html_listing = nil
+
+  if type(figure_html_path_handle) == "userdata" then
+    figure_html_listing = figure_html_path_handle:read("*a")
+    figure_html_path_handle:close()
+  end
+  
+  print(figure_html_listing)
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
