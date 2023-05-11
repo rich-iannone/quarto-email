@@ -1,7 +1,7 @@
 --[[
 Extension for generating email components needed for Posit Connect
 
-1. extracts the subject line of the email from a div with the class `subject` 
+1. extracts the subject line of the email from a div with the class `subject`
 2. takes a div from a Quarto HTML document that has the class `email`, places that in
    a specially-crafted HTML-email template
 3. takes all references to images (i.e, image tags) and replaces them with CID
@@ -15,6 +15,40 @@ Extension for generating email components needed for Posit Connect
    Connect is expecting for its own email generation code
 ]]
 
+local lpeg = require("lpeg")
+
+-- Define lpeg-based function to effectively replace string.gsub()
+function gsub_lpeg(string, pattern, replacement)
+  pattern = lpeg.P(pattern)
+  pattern = lpeg.Cs((pattern / replacement + 1) ^ 0)
+  return lpeg.match(pattern, string)
+end
+
+-- Define function to nicely print a table
+function tbl_print(tbl, indent)
+  if not indent then indent = 0 end
+  local to_print = string.rep(" ", indent) .. "{\r\n"
+  indent = indent + 2
+  for k, v in pairs(tbl) do
+    to_print = to_print .. string.rep(" ", indent)
+    if (type(k) == "number") then
+      to_print = to_print .. "[" .. k .. "] = "
+    elseif (type(k) == "string") then
+      to_print = to_print .. k .. "= "
+    end
+    if (type(v) == "number") then
+      to_print = to_print .. v .. ",\r\n"
+    elseif (type(v) == "string") then
+      to_print = to_print .. "\"" .. v .. "\",\r\n"
+    elseif (type(v) == "table") then
+      to_print = to_print .. tbl_print(v, indent + 2) .. ",\r\n"
+    else
+      to_print = to_print .. "\"" .. tostring(v) .. "\",\r\n"
+    end
+  end
+  to_print = to_print .. string.rep(" ", indent - 2) .. "}"
+  return to_print
+end
 
 -- Define function for Base64-encoding of an image file
 function base64_encode(data)
@@ -138,6 +172,7 @@ local html_email_template_bottom = [[
 local subject = nil
 local attachments = nil
 local email_html = nil
+local email_images = {}
 
 -- TODO:
 --   use a parameter to control whether to produce the contents
@@ -197,7 +232,7 @@ function process_document(doc)
       connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
       html_email_template_bottom
 
-  print("Lines of HTML of email follows:\n" .. html_email_body)
+  -- print("Lines of HTML of email follows:\n" .. html_email_body)
 
   -- Need to get all image files in `report_files/figure-html`
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
@@ -209,10 +244,41 @@ function process_document(doc)
     figure_html_listing = figure_html_path_handle:read("*a")
     figure_html_path_handle:close()
   end
-  
+
   print(figure_html_listing)
 
-  -- Need to get all image tags with paths referenced in the HTML email body
+  -- Create a table that contains all found image tags in the `html_email_body` HTML string 
+  local img_tag_list = {}
+  for img_tag in html_email_body:gmatch("%<img src=.->") do
+    table.insert(img_tag_list, img_tag)
+  end
+
+  print(tbl_print(img_tag_list))
+
+  -- Create a new table that finds paths to image resources on disk
+  local img_tag_filepaths_list = {}
+  for key, _ in pairs(img_tag_list) do
+    img_tag_filepaths_list[key] = img_tag_list[key]:match('src="(.-)"')
+  end
+
+  print(tbl_print(img_tag_filepaths_list))
+
+
+  --[[
+  For each of the <img> tags we need to do a few things in the order they were found:
+    1. determine if the path resolved in `img_tag_filepaths_list` matches an actual
+       path in `figure_html_listing` (if there isn't a match, skip to the next iteration)
+    2. assuming a match, create a Base64-encoded representation of the image and place that
+       into the table `email_images` (it'll be needed for the JSON output file); also,
+    3. modify the <img> tag so that it contains a reference to the Base64 string; this
+       is essentially the creation of Content-ID (or CID) tag, where the basic form of it
+       is `<img src="cid:image-id" alt="My Image">` (the `image-id` will be a number
+       incrementing from `1`)
+  ]]
+
+  -- Example usage of `gsub_lpeg()`:
+  -- local matched = gsub_lpeg(html_email_body, "img", "imagine")
+  -- print(matched)
 
   local image_file = io.open("report_files/figure-html/diamonds_plot-1.png", "rb")
 
@@ -228,6 +294,8 @@ function process_document(doc)
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
+    rsc_body_html = email_html,
+    rsc_email_images = email_images,
     rsc_email_suppress_report_attachment = true,
     rsc_email_suppress_scheduled = false
   })
