@@ -50,6 +50,13 @@ function tbl_print(tbl, indent)
   return to_print
 end
 
+-- Define function to print a short version of a string
+function print_short_str(string)
+  local short_str_1 = string.sub(string, 1, 100)
+  local short_str_2 = string.sub(string, -99)
+  print(short_str_1 .. " ... " .. short_str_2)
+end
+
 -- Define function for Base64-encoding of an image file
 function base64_encode(data)
   local b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -89,8 +96,6 @@ local html_email_template_top = [[
 </xml>
 <![endif]-->
 ]]
-
--- <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
 
 local html_email_template_style = [[
 <style>
@@ -134,30 +139,17 @@ local html_email_template_body_1 = [[
 <div class="header" style="font-family:Helvetica, sans-serif;color:#999999;font-size:12px;font-weight:normal;margin:0 0 24px 0;text-align:center;">
 ]]
 
---$for(include-before)$
---$include-before$
---$endfor$
-
 local html_email_template_body_2 = [[
 </div>
 <table width="100%" class="content" style="background-color:white;">
 <tr>
 ]]
 
--- <td style="padding:12px;">email_body</td>
-
 local html_email_template_body_3 = [[
 </tr>
 </table>
 <div class="footer" style="font-family:Helvetica, sans-serif;color:#999999;font-size:12px;font-weight:normal;margin:24px 0 0 0;">
 ]]
-
--- $for(include-after)$
--- $include-after$
--- $endfor$
--- $if(rsc-footer)$
--- $if(include-after)$
--- <hr/>$endif$
 
 local html_email_template_bottom = [[
 <p>If HTML documents are attached, they may not render correctly when viewed in some email clients. For a better experience, download HTML documents to disk before opening in a web browser.</p>
@@ -204,7 +196,7 @@ function extract_div_html(doc)
 end
 
 function process_document(doc)
-  -- TODO: perform processing on the email HTML
+  -- Perform processing on the email HTML and generate the JSON file required for Connect
 
   local connect_date_time = "2020-12-01 12:00:00"
   local connect_report_rendering_url = "http://www.example.com"
@@ -232,8 +224,6 @@ function process_document(doc)
       connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
       html_email_template_bottom
 
-  -- print("Lines of HTML of email follows:\n" .. html_email_body)
-
   -- Need to get all image files in `report_files/figure-html`
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
@@ -245,24 +235,17 @@ function process_document(doc)
     figure_html_path_handle:close()
   end
 
-  print(figure_html_listing)
-
   -- Create a table that contains all found image tags in the `html_email_body` HTML string 
   local img_tag_list = {}
   for img_tag in html_email_body:gmatch("%<img src=.->") do
     table.insert(img_tag_list, img_tag)
   end
 
-  print(tbl_print(img_tag_list))
-
   -- Create a new table that finds paths to image resources on disk
   local img_tag_filepaths_list = {}
-  for key, _ in pairs(img_tag_list) do
+  for key, _ in ipairs(img_tag_list) do
     img_tag_filepaths_list[key] = img_tag_list[key]:match('src="(.-)"')
   end
-
-  print(tbl_print(img_tag_filepaths_list))
-
 
   --[[
   For each of the <img> tags we need to do a few things in the order they were found:
@@ -272,29 +255,38 @@ function process_document(doc)
        into the table `email_images` (it'll be needed for the JSON output file); also,
     3. modify the <img> tag so that it contains a reference to the Base64 string; this
        is essentially the creation of Content-ID (or CID) tag, where the basic form of it
-       is `<img src="cid:image-id" alt="My Image">` (the `image-id` will be a number
+       is `<img src="cid:image-id"/>` (the `image-id` will be written as `img<n>.png`,
        incrementing from `1`)
   ]]
 
-  -- Example usage of `gsub_lpeg()`:
-  -- local matched = gsub_lpeg(html_email_body, "img", "imagine")
-  -- print(matched)
+  for key, value in ipairs(img_tag_list) do
+    if (true) then -- [1] replace with check for `img_path` in `img_tag_filepaths_list`
 
-  local image_file = io.open("report_files/figure-html/diamonds_plot-1.png", "rb")
+      local image_file_path = img_tag_filepaths_list[key]
+      local image_file = io.open(image_file_path, "rb")
 
-  if type(image_file) == "userdata" then
-    image_data = image_file:read("*all")
-    image_file:close()
+      if type(image_file) == "userdata" then
+        image_data = image_file:read("*all")
+        image_file:close()
+      end
+
+      local encoded_data = base64_encode(image_data)
+      
+      local tbl_named_key_image_data = "img" .. key ..  ".png"
+      local cid_img_tag_replacement = "<img src=\"cid:" .. tbl_named_key_image_data ..  "\"/>"
+
+      -- insert `encoded_data` into `email_images` table with prepared key
+      email_images[tbl_named_key_image_data] = encoded_data
+
+      -- replace tag with cid replacement version
+      html_email_body = gsub_lpeg(html_email_body, value, cid_img_tag_replacement)
+    end
   end
-
-  local encoded_data = base64_encode(image_data)
-
-  -- print(encoded_data)
 
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
-    rsc_body_html = email_html,
+    rsc_body_html = html_email_body,
     rsc_email_images = email_images,
     rsc_email_suppress_report_attachment = true,
     rsc_email_suppress_scheduled = false
@@ -312,13 +304,11 @@ function Pandoc(doc)
 
   process_document(doc)
 
-  -- print JSON document (this is mostly for development purposes)
   local json_file = io.open("connect-email.json", "r")
 
   if json_file then
     local contents = json_file:read("*all")
     json_file:close()
-    print(contents)
   else
     print("Error: could not open file")
   end
