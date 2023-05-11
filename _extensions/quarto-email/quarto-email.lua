@@ -227,10 +227,10 @@ function process_document(doc)
   -- Get listing of all image files in `report_files/figure-html`
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
-  local figure_html_listing = nil
+  local figure_html_dir_listing = nil
 
   if type(figure_html_path_handle) == "userdata" then
-    figure_html_listing = figure_html_path_handle:read("*a")
+    figure_html_dir_listing = figure_html_path_handle:read("*a")
     figure_html_path_handle:close()
   end
 
@@ -249,7 +249,7 @@ function process_document(doc)
   --[[
   For each of the <img> tags we need to do a few things in the order they were found:
     1. determine if the path resolved in `img_tag_filepaths_list` matches an actual
-       path in `figure_html_listing` (if there isn't a match, skip to the next iteration)
+       path in `figure_html_dir_listing` (if there isn't a match, skip to the next iteration)
     2. assuming a match, create a Base64-encoded representation of the image and place that
        into the table `email_images` (it'll be needed for the JSON output file); also,
     3. modify the <img> tag so that it contains a reference to the Base64 string; this
@@ -261,7 +261,7 @@ function process_document(doc)
   local image_data = nil
 
   for key, value in ipairs(img_tag_list) do
-    if (true) then -- TODO: replace with check for `figure_html_listing` in `img_tag_filepaths_list`
+    if (true) then -- TODO: replace with check for each value in `img_tag_filepaths_list` having membership in `figure_html_dir_listing`
 
       local image_file_path = img_tag_filepaths_list[key]
       local image_file = io.open(image_file_path, "rb")
