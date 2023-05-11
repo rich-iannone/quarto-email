@@ -59,7 +59,19 @@ diamonds %>%
   scale_y_continuous(labels = scales::dollar)
 ```
 
-This produces a tibble.
+Nice figure up above. Let's make a second figure.
+
+```{r mtcars_plot}
+mtcars %>%
+ggplot(aes(x = wt, y = hp, col = am)) +
+geom_point() +
+geom_smooth() +
+coord_cartesian(xlim = c(3, 6))
+```
+
+This is an excellent second figure.
+
+The following code will produce a tibble.
 
 ```{r dallas_home_sales}
 dallas_home_sales <- 
