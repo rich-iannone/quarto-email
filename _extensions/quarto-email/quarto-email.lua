@@ -284,6 +284,10 @@ function process_document(doc)
     end
   end
 
+  -- Encode all of the strings and tables of strings into a JSON file that's
+  -- needed for Connect's email feature
+  -- TODO: handle variant with text-based email message bodies
+  --       (using `rsc_email_body_text` instead of `rsc_email_body_html`)
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
