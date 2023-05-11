@@ -224,7 +224,7 @@ function process_document(doc)
       connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
       html_email_template_bottom
 
-  -- Get listing of all image files in `report_files/figure-html`
+  -- Get a listing of all image files in `report_files/figure-html`
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
   local figure_html_dir_listing = nil
@@ -276,7 +276,9 @@ function process_document(doc)
       local tbl_named_key_image_data = "img" .. key ..  ".png"
       local cid_img_tag_replacement = "<img src=\"cid:" .. tbl_named_key_image_data ..  "\"/>"
 
-      -- insert `encoded_data` into `email_images` table with prepared key
+      -- Insert `encoded_data` into `email_images` table with prepared key
+      -- TODO: this seems to be in reverse order in the on-disk JSON file (not sure
+      --       it matters, but it would be better to have it in the correct order)
       email_images[tbl_named_key_image_data] = encoded_data
 
       -- replace tag with cid replacement version
@@ -285,7 +287,7 @@ function process_document(doc)
   end
 
   -- Encode all of the strings and tables of strings into a JSON file that's
-  -- needed for Connect's email feature
+  --   needed for Connect's email feature
   -- TODO: handle variant with text-based email message bodies
   --       (using `rsc_email_body_text` instead of `rsc_email_body_html`)
   local str = quarto.json.encode({
