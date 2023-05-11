@@ -291,7 +291,7 @@ function process_document(doc)
   local str = quarto.json.encode({
     rsc_email_subject = subject,
     rsc_email_attachments = attachments,
-    rsc_body_html = html_email_body,
+    rsc_email_body_html = html_email_body,
     rsc_email_images = email_images,
     rsc_email_suppress_report_attachment = true,
     rsc_email_suppress_scheduled = false
