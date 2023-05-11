@@ -224,11 +224,10 @@ function process_document(doc)
       connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
       html_email_template_bottom
 
-  -- Need to get all image files in `report_files/figure-html`
+  -- Get listing of all image files in `report_files/figure-html`
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
   local figure_html_listing = nil
-  local image_data = nil
 
   if type(figure_html_path_handle) == "userdata" then
     figure_html_listing = figure_html_path_handle:read("*a")
@@ -259,8 +258,10 @@ function process_document(doc)
        incrementing from `1`)
   ]]
 
+  local image_data = nil
+
   for key, value in ipairs(img_tag_list) do
-    if (true) then -- [1] replace with check for `img_path` in `img_tag_filepaths_list`
+    if (true) then -- TODO: replace with check for `figure_html_listing` in `img_tag_filepaths_list`
 
       local image_file_path = img_tag_filepaths_list[key]
       local image_file = io.open(image_file_path, "rb")
