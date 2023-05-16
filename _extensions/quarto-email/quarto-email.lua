@@ -131,6 +131,8 @@ margin-bottom: 24px;
 </head>
 ]]
 
+-- TODO: incorporate `content-width` parameter
+
 local html_email_template_body_1 = [[
 <body style="background-color:#f6f6f6;font-family:Helvetica, sans-serif;color:#222;margin:0;padding:0;">
 <table width="85%" align="center" class="container" style="max-width: $content-width$;">
@@ -198,17 +200,23 @@ end
 function process_document(doc)
   -- Perform processing on the email HTML and generate the JSON file required for Connect
 
+  -- TODO: examine environment variables on Connect to get these strings
   local connect_date_time = "2020-12-01 12:00:00"
   local connect_report_rendering_url = "http://www.example.com"
   local connect_report_url = "http://www.example.com"
   local connect_report_subscription_url = "http://www.example.com"
 
   -- The following regexes remove the surrounding <div> from the HTML text
+  -- TODO: ensure that this works for a large variety of documents
   email_html = string.gsub(email_html, "^<div class=\"email\">", '')
   email_html = string.gsub(email_html, "</div>$", '')
 
   -- Use the Connect email template components along with the `email_html`
   -- fragment to forge the email HTML
+
+  -- TODO: try to optimize this combining of strings, signal which of these
+  --       are variables; idea: use functions to generate key fragments that
+  --       will be combined
 
   local html_email_body =
       html_email_template_top .. html_email_template_style ..
@@ -225,16 +233,21 @@ function process_document(doc)
       html_email_template_bottom
 
   -- Get a listing of all image files in `report_files/figure-html`
+  -- TODO: does Quarto provide a facility for this? Dealing with the filesystem directly seems not ideal
+  -- TODO: there will certainly be more types of graphics than just PNG graphics, ensure that all graphics
+  --       files are accounted for
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
-  local figure_html_dir_listing = nil
+  local figure_html_dir_listing = nil -- is this used?
 
   if type(figure_html_path_handle) == "userdata" then
     figure_html_dir_listing = figure_html_path_handle:read("*a")
     figure_html_path_handle:close()
   end
 
-  -- Create a table that contains all found image tags in the `html_email_body` HTML string 
+  -- Create a table that contains all found image tags in the `html_email_body` HTML string
+  -- TODO: ensure that remote images are untouched
+  -- TODO: explore image AST processing; possible to render image sooner than in postprocess
   local img_tag_list = {}
   for img_tag in html_email_body:gmatch("%<img src=.->") do
     table.insert(img_tag_list, img_tag)
@@ -273,7 +286,7 @@ function process_document(doc)
 
       local encoded_data = base64_encode(image_data)
       
-      local tbl_named_key_image_data = "img" .. key ..  ".png"
+      local tbl_named_key_image_data = "img" .. key .. ".png"
       local cid_img_tag_replacement = "<img src=\"cid:" .. tbl_named_key_image_data ..  "\"/>"
 
       -- Insert `encoded_data` into `email_images` table with prepared key
@@ -298,6 +311,8 @@ function process_document(doc)
     rsc_email_suppress_report_attachment = true,
     rsc_email_suppress_scheduled = false
   })
+
+  -- TODO: Clarify with Connect team which filename to use
   io.open("connect-email.json", "w"):write(str):close()
 end
 
