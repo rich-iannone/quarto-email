@@ -131,11 +131,9 @@ margin-bottom: 24px;
 </head>
 ]]
 
--- TODO: incorporate `content-width` parameter
-
 local html_email_template_body_1 = [[
 <body style="background-color:#f6f6f6;font-family:Helvetica, sans-serif;color:#222;margin:0;padding:0;">
-<table width="85%" align="center" class="container" style="max-width: $content-width$;">
+<table width="85%" align="center" class="container" style="max-width:1000px;">
 <tr>
 <td style="padding:24px;">
 <div class="header" style="font-family:Helvetica, sans-serif;color:#999999;font-size:12px;font-weight:normal;margin:0 0 24px 0;text-align:center;">
