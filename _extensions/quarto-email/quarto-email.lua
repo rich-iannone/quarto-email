@@ -75,7 +75,7 @@ end
 -- Define path for images associated with figures
 local figure_html_path = "report_files/figure-html"
 
-local html_email_template_top = [[
+local html_email_template_1 = [[
 <!DOCTYPE html>
 <html>
 <head>
@@ -95,9 +95,6 @@ local html_email_template_top = [[
 </o:OfficeDocumentSettings>
 </xml>
 <![endif]-->
-]]
-
-local html_email_template_style = [[
 <style>
 body {
 font-family: Helvetica, sans-serif;
@@ -129,29 +126,23 @@ margin-bottom: 24px;
 }
 </style>
 </head>
-]]
-
-local html_email_template_body_1 = [[
 <body style="background-color:#f6f6f6;font-family:Helvetica, sans-serif;color:#222;margin:0;padding:0;">
 <table width="85%" align="center" class="container" style="max-width:1000px;">
 <tr>
 <td style="padding:24px;">
 <div class="header" style="font-family:Helvetica, sans-serif;color:#999999;font-size:12px;font-weight:normal;margin:0 0 24px 0;text-align:center;">
-]]
-
-local html_email_template_body_2 = [[
 </div>
 <table width="100%" class="content" style="background-color:white;">
 <tr>
 ]]
 
-local html_email_template_body_3 = [[
+local html_email_template_2 = [[
 </tr>
 </table>
 <div class="footer" style="font-family:Helvetica, sans-serif;color:#999999;font-size:12px;font-weight:normal;margin:24px 0 0 0;">
 ]]
 
-local html_email_template_bottom = [[
+local html_email_template_3 = [[
 <p>If HTML documents are attached, they may not render correctly when viewed in some email clients. For a better experience, download HTML documents to disk before opening in a web browser.</p>
 </div>
 </td>
@@ -217,18 +208,17 @@ function process_document(doc)
   --       will be combined
 
   local html_email_body =
-      html_email_template_top .. html_email_template_style ..
-      html_email_template_body_1 .. html_email_template_body_2 ..
+      html_email_template_1 ..
       "<td style=\"padding:12px;\">" .. email_html .. "</td>" ..
-      html_email_template_body_3 ..
+      html_email_template_2 ..
       "<p>This message was generated on " .. connect_date_time .. ".</p>\n\n" ..
-      "<p>This Version: <a href=\"" .. connect_report_rendering_url .. "\">" ..
-      connect_report_rendering_url .. "</a><br/>" ..
+      "<p>This Version: <a href=\"" .. connect_report_rendering_url .. 
+      "\">" .. connect_report_rendering_url .. "</a><br/>" ..
       "Latest Version: <a href=\"" .. connect_report_url ..
-      "\">$rsc-report-url$</a></p>\n\n" ..
+      "\">" .. connect_report_url .. "</a></p>\n\n" ..
       "<p>If you wish to stop receiving emails for this document, you may <a href=\"" ..
       connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" ..
-      html_email_template_bottom
+      html_email_template_3
 
   -- Get a listing of all image files in `report_files/figure-html`
   -- TODO: does Quarto provide a facility for this? Dealing with the filesystem directly seems not ideal
@@ -236,7 +226,7 @@ function process_document(doc)
   --       files are accounted for
   local figure_html_path_ls_png_command = "ls " .. figure_html_path .. "/*.png"
   local figure_html_path_handle = io.popen(figure_html_path_ls_png_command)
-  local figure_html_dir_listing = nil -- is this used?
+  local figure_html_dir_listing = nil
 
   if type(figure_html_path_handle) == "userdata" then
     figure_html_dir_listing = figure_html_path_handle:read("*a")
@@ -244,8 +234,6 @@ function process_document(doc)
   end
 
   -- Create a table that contains all found image tags in the `html_email_body` HTML string
-  -- TODO: ensure that remote images are untouched
-  -- TODO: explore image AST processing; possible to render image sooner than in postprocess
   local img_tag_list = {}
   for img_tag in html_email_body:gmatch("%<img src=.->") do
     table.insert(img_tag_list, img_tag)
@@ -271,6 +259,9 @@ function process_document(doc)
 
   local image_data = nil
 
+  print("Directory Listing: \n" .. figure_html_dir_listing .. "\n")
+  print(tbl_print(img_tag_filepaths_list))
+
   for key, value in ipairs(img_tag_list) do
     if (true) then -- TODO: replace with check for each value in `img_tag_filepaths_list` having membership in `figure_html_dir_listing`
 
@@ -284,18 +275,19 @@ function process_document(doc)
 
       local encoded_data = base64_encode(image_data)
       
+      -- Prepare identifier for image and create an image tag replacement for within `html_email_body`
       local tbl_named_key_image_data = "img" .. key .. ".png"
       local cid_img_tag_replacement = "<img src=\"cid:" .. tbl_named_key_image_data ..  "\"/>"
 
       -- Insert `encoded_data` into `email_images` table with prepared key
-      -- TODO: this seems to be in reverse order in the on-disk JSON file (not sure
-      --       it matters, but it would be better to have it in the correct order)
       email_images[tbl_named_key_image_data] = encoded_data
 
-      -- replace tag with cid replacement version
+      -- Replace tag with cid replacement version
       html_email_body = gsub_lpeg(html_email_body, value, cid_img_tag_replacement)
     end
   end
+
+  print(html_email_body)
 
   -- Encode all of the strings and tables of strings into a JSON file that's
   --   needed for Connect's email feature
