@@ -303,7 +303,9 @@ function process_document(doc)
   })
 
   -- TODO: Clarify with Connect team which filename to use
-  io.open("connect-email.json", "w"):write(str):close()
+  -- TODO: Find out what the Connect output directory and write the file there
+  --   (this is the Quarto project output dir)
+  io.open(".output_metadata.json", "w"):write(str):close()
 end
 
 function Pandoc(doc)
