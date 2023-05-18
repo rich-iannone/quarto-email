@@ -16,7 +16,7 @@ library(tidyverse)
 
 ## A fancy report
 
-:::
+::: {#unrelated}
 This is an unrelated div.
 :::
 
@@ -28,6 +28,8 @@ Hello
 write.csv(iris, "attach1.txt", row.names = FALSE)
 write.csv(iris, "attach2.txt", row.names = FALSE)
 ```
+
+This is the final paragraph before the email portion.
 
 ::: {.email}
 
@@ -83,6 +85,8 @@ dallas_home_sales <-
 dallas_home_sales
 ```
 
-And that is it.
+And that is it for the email.
 
 :::
+
+This is the final paragraph in the document.
