@@ -182,6 +182,7 @@ function Div(div)
 end
 
 -- function to extract the rendered HTML from a Div of class 'email'
+-- try using pandoc.walk() and get each img
 function extract_div_html(doc)
   return pandoc.write(pandoc.Pandoc({ doc }), "html")
 end
@@ -257,10 +258,14 @@ function process_document(doc)
        incrementing from `1`)
   ]]
 
+  -- This gets the project output directory
+  -- nil if no project, a path if so
+  --print(quarto.project.output_directory)
+
   local image_data = nil
 
-  print("Directory Listing: \n" .. figure_html_dir_listing .. "\n")
-  print(tbl_print(img_tag_filepaths_list))
+  --print("Directory Listing: \n" .. figure_html_dir_listing .. "\n")
+  --print(tbl_print(img_tag_filepaths_list))
 
   for key, value in ipairs(img_tag_list) do
     if (true) then -- TODO: replace with check for each value in `img_tag_filepaths_list` having membership in `figure_html_dir_listing`
@@ -287,7 +292,9 @@ function process_document(doc)
     end
   end
 
-  print(html_email_body)
+  -- print(html_email_body)
+
+  -- Pandoc's resource processing is available in a JSON file
 
   -- Encode all of the strings and tables of strings into a JSON file that's
   --   needed for Connect's email feature
@@ -302,10 +309,15 @@ function process_document(doc)
     rsc_email_suppress_scheduled = false
   })
 
-  -- TODO: Clarify with Connect team which filename to use
   -- TODO: Find out what the Connect output directory and write the file there
   --   (this is the Quarto project output dir)
-  io.open("report_files/.output_metadata.json", "w"):write(str):close()
+  io.open(".output_metadata.json", "w"):write(str):close()
+
+  
+  local file = quarto.doc.input_file
+  local dir = pandoc.path.directory(file)
+  local resource = pandoc.path.join({dir, ".output_metadata.json"})
+  quarto.doc.add_supporting(resource)
 end
 
 function Pandoc(doc)
@@ -318,11 +330,11 @@ function Pandoc(doc)
 
   process_document(doc)
 
-  local json_file = io.open("report_files/.output_metadata.json", "r")
+  -- local json_file = io.open(".output_metadata.json", "r")
 
   if json_file then
-    local contents = json_file:read("*all")
-    json_file:close()
+    -- local contents = json_file:read("*all")
+    -- json_file:close()
   else
     print("Error: could not open file")
   end
