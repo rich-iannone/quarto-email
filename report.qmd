@@ -8,6 +8,9 @@ filters:
   - quarto-email
 embed-resources: false
 rsc-report-rendering-url: https://example.com/test.html
+project:
+  type: default
+  output-dir: output
 ---
 
 ```{r setup}
