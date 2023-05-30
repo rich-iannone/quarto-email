@@ -8,3 +8,5 @@
 attach*.txt
 report.html
 dev_resources
+
+/.quarto/
