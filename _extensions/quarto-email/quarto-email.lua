@@ -171,7 +171,6 @@ function Meta(meta)
     end
   end
 
-  -- etc.
   meta["rsc-report-rendering-url"] = "..."
 end
 
