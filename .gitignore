@@ -10,3 +10,6 @@ report.html
 dev_resources
 
 /.quarto/
+.Rproj.user
+_publish.yml
+quarto-email.Rproj
