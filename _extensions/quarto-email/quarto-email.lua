@@ -164,8 +164,11 @@ local email_images = {}
 
 function Meta(meta)
   attachments = {}
-  for _, v in pairs(meta.attachments) do
-    table.insert(attachments, pandoc.utils.stringify(v))
+
+  if meta.attachments ~= nil then
+    for _, v in pairs(meta.attachments) do
+      table.insert(attachments, pandoc.utils.stringify(v))
+    end
   end
 
   -- etc.
