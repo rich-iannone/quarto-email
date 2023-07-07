@@ -325,17 +325,17 @@ function Pandoc(doc)
   -- if rendering_email then
   --   -- make the content of doc be only the content of the .email div
   -- else
-  --   -- remove the .email div from doc
+  --   -- remove the .email div from the document
   -- end
 
   process_document(doc)
 
   -- local json_file = io.open(".output_metadata.json", "r")
 
-  if json_file then
+  -- if json_file then
     -- local contents = json_file:read("*all")
     -- json_file:close()
-  else
-    print("Error: could not open file")
-  end
+  -- else
+    -- print("Error: could not open file")
+  -- end
 end
