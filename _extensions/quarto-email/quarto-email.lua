@@ -165,11 +165,15 @@ local email_images = {}
 function Meta(meta)
   attachments = {}
 
-  if meta.attachments ~= nil then
-    for _, v in pairs(meta.attachments) do
+  local meta_attachments = meta.attachments
+
+  if meta_attachments ~= nil then
+    for _, v in pairs(meta_attachments) do
       table.insert(attachments, pandoc.utils.stringify(v))
     end
   end
+
+  print(#attachments)
 
   meta["rsc-report-rendering-url"] = "..."
 end
@@ -314,12 +318,15 @@ function process_document(doc)
   -- TODO: Find out what the Connect output directory and write the file there
   --   (this is the Quarto project output dir)
   io.open(".output_metadata.json", "w"):write(str):close()
-
   
-  local file = quarto.doc.input_file
-  local dir = pandoc.path.directory(file)
-  local resource = pandoc.path.join({dir, ".output_metadata.json"})
-  quarto.doc.add_supporting(resource)
+  -- local file = quarto.doc.input_file
+  -- local dir = pandoc.path.directory(file)
+  -- local resource = pandoc.path.join({dir, ".output_metadata.json"})
+
+  -- print("directory is: " .. dir)
+  -- print("resource is: " .. resource)
+
+  -- quarto.doc.add_supporting(resource)
 end
 
 function Pandoc(doc)
