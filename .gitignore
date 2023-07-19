@@ -11,5 +11,6 @@ dev_resources
 
 /.quarto/
 .Rproj.user
+.Rhistory
 _publish.yml
 quarto-email.Rproj
