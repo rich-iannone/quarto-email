@@ -1,16 +1,16 @@
 ---
 format: html
+filters:
+  - rich-iannone/quarto-email
+resource_files:
+  - .output_metadata.json
 attachments:
   - attach1.txt
   - attach2.txt
-# this part will go on _extension.yml
-filters:
-  - quarto-email
 embed-resources: false
-rsc-report-rendering-url: https://example.com/test.html
-project:
-  type: default
-  output-dir: output
+resources:
+  - attach1.txt
+  - attach2.txt
 ---
 
 ```{r setup}
