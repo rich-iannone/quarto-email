@@ -5,7 +5,7 @@
 *.md
 /.luarc.json
 .connect-email.json
-attach*.txt
+*.txt
 report.html
 dev_resources
 
