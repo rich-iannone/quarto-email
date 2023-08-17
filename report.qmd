@@ -1,14 +1,9 @@
 ---
-format: html
+format:
+  html: default
 filters:
   - rich-iannone/quarto-email
-resource_files:
-  - .output_metadata.json
 attachments:
-  - attach1.txt
-  - attach2.txt
-embed-resources: false
-resources:
   - attach1.txt
   - attach2.txt
 ---
@@ -24,7 +19,7 @@ This is an unrelated div.
 :::
 
 
-Hello
+Hello, let's write two CSV files.
 
 ```{r}
 #| echo: false
@@ -34,20 +29,27 @@ write.csv(iris, "attach2.txt", row.names = FALSE)
 
 This is the final paragraph before the email portion.
 
+<img src="https://www.r-project.org/logo/Rlogo.png" style="height:50px;">
+
 ::: {.email}
+
+The date and time is: `r Sys.time()`.
+
+<img src="https://www.r-project.org/logo/Rlogo.png" style="height:50px;">
 
 ::: {.subject}
 This is a subject.
 :::
 
+
 Here is some **R** code, which is contained within a code chunk. It produces a plot.
 
 ```{r diamonds_plot}
 
-diamonds %>%
-  group_by(carat, cut) %>%
-  summarize(mean_price = mean(price)) %>%
-  filter(cut != "Fair", carat < 3) %>%
+diamonds |>
+  group_by(carat, cut) |>
+  summarize(mean_price = mean(price)) |>
+  filter(cut != "Fair", carat < 3) |>
   ggplot() +
   geom_point(aes(x = carat, y = mean_price)) +
   stat_smooth(
@@ -67,11 +69,11 @@ diamonds %>%
 Nice figure up above. Let's make a second figure.
 
 ```{r mtcars_plot}
-mtcars %>%
-ggplot(aes(x = wt, y = hp, col = am)) +
-geom_point() +
-geom_smooth() +
-coord_cartesian(xlim = c(3, 6))
+mtcars |>
+  ggplot(aes(x = wt, y = hp, col = am)) +
+  geom_point() +
+  geom_smooth() +
+  coord_cartesian(xlim = c(3, 6))
 ```
 
 This is an excellent second figure.
@@ -80,9 +82,9 @@ The following code will produce a tibble.
 
 ```{r dallas_home_sales}
 dallas_home_sales <- 
-  txhousing %>%
-  filter(city == "Dallas") %>%
-  group_by(year) %>%
+  txhousing |>
+  filter(city == "Dallas") |>
+  group_by(year) |>
   summarize(total_sales = sum(sales, na.rm = TRUE))
 
 dallas_home_sales
@@ -92,4 +94,4 @@ And that is it for the email.
 
 :::
 
-This is the final paragraph in the document.
+This is the last paragraph in the document.
