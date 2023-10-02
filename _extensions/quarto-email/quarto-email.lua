@@ -36,6 +36,10 @@ function get_file_extension(file_path)
   return ext
 end
 
+function is_empty_table(table)
+  return next(table) == nil
+end
+
 local html_email_template_1 = [[
 <!DOCTYPE html>
 <html>
@@ -138,6 +142,11 @@ function Div(div)
   if div.classes:includes("subject") then
 
     subject = pandoc.utils.stringify(div)
+    return {}
+
+  elseif div.classes:includes("email-text") then
+
+    email_text = pandoc.write(pandoc.Pandoc({ div }), "plain")
     return {}
   
   elseif div.classes:includes("email") then
@@ -244,14 +253,29 @@ function process_document(doc)
 
   -- Encode all of the strings and tables of strings into a JSON file that's
   -- needed for Connect's email feature
-  local metadata_str = quarto.json.encode({
-    rsc_email_subject = subject,
-    rsc_email_attachments = attachments,
-    rsc_email_body_html = html_email_body,
-    rsc_email_images = email_images,
-    rsc_email_suppress_report_attachment = true,
-    rsc_email_suppress_scheduled = false
-  })
+  if (is_empty_table(email_images)) then
+
+    metadata_str = quarto.json.encode({
+      rsc_email_subject = subject,
+      rsc_email_attachments = attachments,
+      rsc_email_body_html = html_email_body,
+      rsc_email_body_text = email_text,
+      rsc_email_suppress_report_attachment = true,
+      rsc_email_suppress_scheduled = false
+    })
+
+  else
+
+    metadata_str = quarto.json.encode({
+      rsc_email_subject = subject,
+      rsc_email_attachments = attachments,
+      rsc_email_body_html = html_email_body,
+      rsc_email_body_text = email_text,
+      rsc_email_images = email_images,
+      rsc_email_suppress_report_attachment = true,
+      rsc_email_suppress_scheduled = false
+    })
+  end
 
   -- Determine the location of the Quarto project directory; if not defined
   -- by the user then set to the location of the input file
