@@ -40,6 +40,15 @@ function is_empty_table(table)
   return next(table) == nil
 end
 
+function file_exists(path)
+  local file = io.open(path, "r")
+  if file then
+    file:close()
+    return true
+  end
+  return false
+end
+
 local html_email_template_1 = [[
 <!DOCTYPE html>
 <html>
@@ -132,7 +141,9 @@ function Meta(meta)
   
   if meta_attachments ~= nil then
     for _, v in pairs(meta_attachments) do
-      table.insert(attachments, pandoc.utils.stringify(v))
+      if (file_exists(pandoc.utils.stringify(v))) then
+        table.insert(attachments, pandoc.utils.stringify(v))
+      end
     end
   end
 end
@@ -288,12 +299,17 @@ function process_document(doc)
   end
 
   -- For all file attachments declared by the user, ensure they copied over
-  -- to the project directory (`dir`) 
+  -- to the project directory (`dir`)
   for _, v in pairs(attachments) do
+    
     local source_attachment_file = pandoc.utils.stringify(v)
     local dest_attachment_path_file = pandoc.path.join({dir, pandoc.utils.stringify(v)})
-    local attachment_text = io.open(source_attachment_file):read("*a")
-    io.open(dest_attachment_path_file, "w"):write(attachment_text):close()
+
+    -- Only if the file exists should it be copied into the project directory
+    if (file_exists(source_attachment_file)) then
+      local attachment_text = io.open(source_attachment_file):read("*a")
+      io.open(dest_attachment_path_file, "w"):write(attachment_text):close()
+    end
   end
   
   -- Write the `.output_metadata.json` file to the project directory
