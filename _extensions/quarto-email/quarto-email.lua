@@ -223,10 +223,9 @@ function process_document(doc)
       html_email_template_2 ..
       html_email_template_3 ..
       "<p>This message was generated on " .. connect_date_time .. ".</p>\n\n" ..
-      "<p>This Version: <a href=\"" .. connect_report_rendering_url .. "\">" .. connect_report_rendering_url .. "</a>\n\n" .. 
+      "<p>This Version: <a href=\"" .. connect_report_rendering_url .. "\">" .. connect_report_rendering_url .. "</a></p>\n\n" .. 
       "Latest Version: <a href=\"" .. connect_report_url .. "\">" .. connect_report_url .. "</a></p>\n\n" ..
-      "<p>If you wish to stop receiving emails for this document, you may <a href=\"" .. connect_report_subscription_url .. "\">unsubscribe here</a>.</p>" .. 
-      "<br/>" ..
+      "<p>If you wish to stop receiving emails for this document, you may <a href=\"" .. connect_report_subscription_url .. "\">unsubscribe here</a>.</p>\n\n" .. 
       html_email_template_4
   end
 
