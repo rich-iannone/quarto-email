@@ -49,6 +49,28 @@ function file_exists(path)
   return false
 end
 
+function str_trunc_trim(str, max_length)
+  local str_trimmed = str:match("^%s*(.-)%s*$")
+  local str_formatted = string.sub(str_trimmed, 1, max_length)
+  return str_formatted
+end
+
+function str_truthy_falsy(str)
+  local truthy_terms = {"true", "yes"}
+  local falsy_terms = {"false", "no"}
+  for _, term in ipairs(truthy_terms) do
+    if string.match(str, term) then
+      return true
+    end
+  end
+  for _, term in ipairs(falsy_terms) do
+    if string.match(str, term) then
+      return false
+    end
+  end
+  return false
+end
+
 local html_email_template_1 = [[
 <!DOCTYPE html>
 <html>
@@ -132,6 +154,7 @@ local html_email_template_4 = [[
 local subject = nil
 local email_images = {}
 local image_tbl = {}
+local suppress_scheduled_email = false
 
 function Meta(meta)
 
@@ -159,6 +182,15 @@ function Div(div)
 
     email_text = pandoc.write(pandoc.Pandoc({ div }), "plain")
     return {}
+
+  elseif div.classes:includes("email-scheduled") then
+
+    local email_scheduled_str = str_trunc_trim(string.lower(pandoc.utils.stringify(div)), 10)
+    local scheduled_email = str_truthy_falsy(email_scheduled_str)
+
+    suppress_scheduled_email = not scheduled_email
+
+    return {}
   
   elseif div.classes:includes("email") then
 
@@ -174,16 +206,12 @@ function Div(div)
     local renderDiv = quarto._quarto.ast.walk(div, {Image = function(imgEl)
 
       local file_extension = get_file_extension(imgEl.src)
-
       local cid = "img" .. tostring(count) .. "." .. file_extension
-
       image_tbl[cid] = imgEl.src
-
       imgEl.src = "cid:" .. cid
-
       count = count + 1
-
       return imgEl
+      
     end})
 
     email_html = extract_div_html(renderDiv)
@@ -271,7 +299,7 @@ function process_document(doc)
       rsc_email_body_html = html_email_body,
       rsc_email_body_text = email_text,
       rsc_email_suppress_report_attachment = true,
-      rsc_email_suppress_scheduled = false
+      rsc_email_suppress_scheduled = suppress_scheduled_email
     })
 
   else
@@ -283,7 +311,7 @@ function process_document(doc)
       rsc_email_body_text = email_text,
       rsc_email_images = email_images,
       rsc_email_suppress_report_attachment = true,
-      rsc_email_suppress_scheduled = false
+      rsc_email_suppress_scheduled = suppress_scheduled_email
     })
   end
 
