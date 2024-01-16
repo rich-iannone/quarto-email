@@ -189,7 +189,7 @@ local email_images = {}
 local image_tbl = {}
 local suppress_scheduled_email = false
 
-function Meta(meta)
+function process_meta(meta)
 
   attachments = {}
 
@@ -205,7 +205,7 @@ function Meta(meta)
   end
 end
 
-function Div(div)
+function process_div(div)
 
   if div.classes:includes("subject") then
 
@@ -331,20 +331,18 @@ function process_document(doc)
   local image_data = nil
 
   for cid, img in pairs(image_tbl) do
-    if (true) then
 
-      local image_file = io.open(img, "rb")
+    local image_file = io.open(img, "rb")
 
-      if type(image_file) == "userdata" then
-        image_data = image_file:read("*all")
-        image_file:close()
-      end
-
-      local encoded_data = quarto.base64.encode(image_data)
-      
-      -- Insert `encoded_data` into `email_images` table with prepared key
-      email_images[cid] = encoded_data
+    if type(image_file) == "userdata" then
+      image_data = image_file:read("*all")
+      image_file:close()
     end
+
+    local encoded_data = quarto.base64.encode(image_data)
+      
+    -- Insert `encoded_data` into `email_images` table with prepared key
+    email_images[cid] = encoded_data
   end
 
   -- Encode all of the strings and tables of strings into the JSON file
@@ -409,6 +407,8 @@ function process_document(doc)
   end
 end
 
-function Pandoc(doc)
-  process_document(doc)
-end
+return {
+  Pandoc = process_document,
+  Meta = process_meta,
+  Div = process_div,
+}
