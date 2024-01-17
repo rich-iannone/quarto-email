@@ -402,9 +402,9 @@ function process_document(doc)
   local metadata_path_file = pandoc.path.join({dir, ".output_metadata.json"})
   io.open(metadata_path_file, "w"):write(metadata_str):close()
 
-  -- Write the `.email-preview.html` file to the working directory if the option is taken
-  if (meta_email_preview) then
-    quarto._quarto.file.write(pandoc.path.join({dir, "email-preview/email-preview.html"}), html_preview_body)
+  -- Write the `email-preview/index.html` file unless meta_email_preview is false
+  if meta_email_preview ~= false then
+    quarto._quarto.file.write(pandoc.path.join({dir, "email-preview/index.html"}), html_preview_body)
   end
 end
 
