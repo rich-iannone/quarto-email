@@ -189,8 +189,12 @@ local subject = nil
 local email_images = {}
 local image_tbl = {}
 local suppress_scheduled_email = false
+local found_email_div = false
 
 function process_meta(meta)
+  if not found_email_div then
+    return
+  end
 
   attachments = {}
 
@@ -206,7 +210,18 @@ function process_meta(meta)
   end
 end
 
+-- Function to check whether a div with the 'email' class is present in the document
+function find_email_div(div)
+  if div.classes:includes("email") then
+    found_email_div = true
+  end
+end
+
 function process_div(div)
+
+  if not found_email_div then
+    return nil
+  end
 
   if div.classes:includes("subject") then
 
@@ -292,6 +307,10 @@ function extract_email_div_str(doc)
 end
 
 function process_document(doc)
+
+  if not found_email_div then
+    return doc
+  end
 
   -- Get the current date and time
   local connect_date_time = os.date("%Y-%m-%d %H:%M:%S")
@@ -416,7 +435,13 @@ function process_document(doc)
 end
 
 return {
-  Pandoc = process_document,
-  Meta = process_meta,
-  Div = process_div,
+  {
+    Div = find_email_div,
+  },
+  {
+    Pandoc = process_document,
+    Meta = process_meta,
+    Div = process_div,
+  }
 }
+
