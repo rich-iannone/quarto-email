@@ -328,7 +328,7 @@ function process_document(doc)
 
   -- Right after the </head> tag in `html_preview_body` we need to insert a subject line HTML string;
   -- this is the string to be inserted:
-  subject_html_preview = "<div style=\"background-color: white;\"><hr /><span style=\"margin-left: 25px\"><span style=\"font-weight: bold;\">Subject:</span> " .. subject .. "</span><hr /></div>"
+  subject_html_preview = "<div style=\"text-align: center; background-color: #fcfcfc; padding-top: 12px; font-size: large;\"><span style=\"margin-left: 25px\"><strong><span style=\"font-variant: small-caps;\">subject: </span></strong>" .. subject .. "</span><hr /></div>"
 
   -- insert `subject_html_preview` into `html_preview_body` at the aforementioned location
   html_preview_body = string.gsub(html_preview_body, "</head>", "</head>\n" .. subject_html_preview)
