@@ -6,6 +6,7 @@
 /.luarc.json
 .connect-email.json
 *.txt
+*.dcf
 report.html
 dev_resources
 
