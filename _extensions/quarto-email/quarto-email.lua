@@ -13,7 +13,8 @@ Extension for generating email components needed for Posit Connect
    we must also include mime type information
 5. Generates a JSON file (.output_metadata.json) which contains specific email message
    components that Posit Connect expects for its own email generation code
-6. Produces a local `email-preview.html` file for previewing the HTML email
+6. Produces a local `index.html` file that contains the HTML email for previewing purposes
+   (this can be disabled by setting `email-preview: false` in the YAML header)
 --]]
 
 -- Get the file extension of any file residing on disk
